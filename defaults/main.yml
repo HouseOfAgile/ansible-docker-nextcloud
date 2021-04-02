@@ -1,0 +1,23 @@
+---
+# defaults file for ansible-docker-nextcloud
+
+nextcloud_services:
+  - name: someservice  
+    app_main_domain: "someservice.example.com"
+    app_main_domains: 
+      - "someservice.example.com"
+      - "somealias.example.com"
+    app_traefik_domains: "`someservice.example.com`,`somealiasservice.example.com`"
+    nextcloud_image_version: "21.0.0"
+    nextcloud_volume_size: "10G"
+    mysql_database: "someservice_db"
+    mysql_user: "someservice_user"
+    mysql_password: "someservice_password"
+    mysql_root_password: "mysql_root_password"
+    nextcloud_admin_user: "admin"
+    nextcloud_admin_password: "admin_password"
+    smtp_host: "box.someservice.com"
+    smtp_secure: "STARTTLS"
+    smtp_port: "587"
+    smtp_name: "somemail@someservice.com"
+    smtp_password: "some_password"  

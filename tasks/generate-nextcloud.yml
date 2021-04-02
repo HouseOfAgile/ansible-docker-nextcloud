@@ -1,0 +1,44 @@
+
+- name: Create nextcloud service directory
+  file:
+    path: "{{ nextcloud_install_dir }}/{{ item.name }}"
+    state: directory
+    # owner: "{{ depl_user }}"
+    # group: "{{ depl_group }}"
+    mode: 0755
+  register: nextcloud_directory_stat
+
+- name: Debug 
+  ansible.builtin.debug:
+    msg:
+    - "DEBUG:: nextcloud_directory_stat: {{ nextcloud_directory_stat }}"
+
+- name: Generate Nextcloud docker-compose
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ nextcloud_directory_stat.path }}/docker-compose.yml"
+    owner: "{{ depl_user }}"
+
+- name: Generate dotenv
+  template:
+    src: dotenv.j2
+    dest: "{{ nextcloud_directory_stat.path }}/.env"
+    owner: "{{ depl_user }}"
+    group: "{{ depl_group }}"
+    mode: 0644
+
+- name: Generate db.env
+  template:
+    src: db.env.j2
+    dest: "{{ nextcloud_directory_stat.path }}/db.env"
+    owner: "{{ depl_user }}"
+    group: "{{ depl_group }}"
+    mode: 0644
+
+- name: Generate nginx.conf
+  template:
+    src: nginx.conf.j2
+    dest: "{{ nextcloud_directory_stat.path }}/nginx.conf"
+    owner: "{{ depl_user }}"
+    group: "{{ depl_group }}"
+    mode: 0644

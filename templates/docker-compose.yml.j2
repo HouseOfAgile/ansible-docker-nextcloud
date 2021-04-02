@@ -1,0 +1,92 @@
+version: "2"
+
+volumes:
+  vol-{{ item.name }}-db:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "/srv/volumes/${APP_NAME}-db"
+  vol-{{ item.name }}-app:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind,size=${HOA_NC_SIZE}"
+      device: "/srv/volumes/${APP_NAME}"
+services:
+  {{ item.name }}-db:
+    image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    volumes:
+      - vol-{{ item.name }}-db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    env_file:
+      - db.env
+    networks:
+      - hoa_network
+      
+  {{ item.name }}-app:
+    image: nextcloud:${NEXTCLOUD_VERSION}-fpm
+    links:
+      - {{ item.name }}-db
+    volumes:
+      - vol-{{ item.name }}-app:/var/www/html:Z
+    depends_on:
+      - {{ item.name }}-db-backup
+      - {{ item.name }}-db
+    restart: always
+    environment:
+      # - MYSQL_DATABASE=${MYSQL_DATABASE}
+      # - MYSQL_USER=${MYSQL_USER}
+      # - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_HOST={{ item.name }}-db
+      - NEXTCLOUD_ADMIN_USER=${NEXTCLOUD_ADMIN_USER}
+      - NEXTCLOUD_ADMIN_PASSWORD=${NEXTCLOUD_ADMIN_PASSWORD}
+      - NEXTCLOUD_TRUSTED_DOMAINS=${NEXTCLOUD_TRUSTED_DOMAINS}
+      - TRUSTED_PROXIES="${TRUSTED_PROXIES}"
+      - OVERWRITEPROTOCOL=https
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_NAME=${SMTP_NAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    env_file:
+      - db.env
+    networks:
+      - hoa_network
+
+  {{ item.name }}-db-backup:
+    image: databack/mysql-backup
+    restart: always
+    volumes:
+      - /srv/this_backup/${APP_NAME}_db:/db
+    links:
+      - {{ item.name }}-db
+    environment:
+      DB_SERVER: {{ item.name }}-db
+      DB_USER: root
+      DB_PASS: ${MYSQL_ROOT_PASSWORD}
+      DB_DUMP_CRON: 0 3 * * *
+      DB_DUMP_TARGET: /db
+    networks:
+      - hoa_network
+
+  {{ item.name }}-web:
+    build: ./web
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${APP_NAME}.rule=Host(${APP_MAIN_DOMAIN})
+      - traefik.http.routers.${APP_NAME}.tls.certresolver=default    
+    volumes:
+      - vol-{{ item.name }}-app:/var/www/html:ro
+    depends_on:
+      - {{ item.name }}-app
+    networks:
+      - hoa_network
+
+networks:
+  hoa_network:
+    external: true
