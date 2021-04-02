@@ -1,6 +1,9 @@
 ---
 # defaults file for ansible-docker-nextcloud
 
+nextcloud_install_dir: "/opt/hoa-exploitation/hoa-services/{{ inventory_hostname }}/nextclouds"
+nextcloud_volumes_dir: "/srv/volumes"
+
 nextcloud_services:
   - name: someservice  
     app_main_domain: "someservice.example.com"

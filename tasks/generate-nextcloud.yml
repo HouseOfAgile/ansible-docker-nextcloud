@@ -3,10 +3,21 @@
   file:
     path: "{{ nextcloud_install_dir }}/{{ item.name }}"
     state: directory
-    # owner: "{{ depl_user }}"
-    # group: "{{ depl_group }}"
+    owner: "{{ depl_user }}"
     mode: 0755
   register: nextcloud_directory_stat
+
+- name: Create nextcloud volumes
+  file:
+    path: "{{ nextcloud_volumes_dir }}/{{ dir_item }}"
+    state: directory
+    owner: "{{ depl_user }}"
+    mode: 0755
+  with_items:
+    - "{{ item.name }}"
+    - "{{ item.name }}-db"
+  loop_control:
+    loop_var: dir_item
 
 - name: Debug 
   ansible.builtin.debug:
