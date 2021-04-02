@@ -1,2 +1,3 @@
 # ansible-docker-nextcloud
-A docker compose based nextcloud install deployable with ansible 
+
+An ansible role to deploy a docker compose based nextcloud install 
