@@ -1,9 +1,10 @@
 APP_NAME={{ item.name }}
 # APP_MAIN_DOMAIN=`nc-max.postdamer.hoadata.company`,`max-renewables.de`
 APP_MAIN_DOMAIN={{ item.app_traefik_domains}}
+APP_TRAEFIK_DOMAINS={{ item.app_traefik_domains}}
 # NEXTCLOUD_TRUSTED_DOMAINS='"nc-max.postdamer.houseofagile.com"'
 NEXTCLOUD_TRUSTED_DOMAINS='{{ item.app_main_domains|join(' ') }}'
-HOA_NC_SIZE={{ item.nextcloud_volume_size }}
+NEXTCLOUD_VOLUME_SIZE={{ item.nextcloud_volume_size }}
 MYSQL_ROOT_PASSWORD={{ item.mysql_root_password }}
 MYSQL_PASSWORD={{ item.mysql_password }}
 MYSQL_DATABASE={{ item.mysql_database }}

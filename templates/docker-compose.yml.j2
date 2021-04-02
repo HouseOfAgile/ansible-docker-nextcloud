@@ -11,7 +11,7 @@ volumes:
     driver: local
     driver_opts:
       type: "none"
-      o: "bind,size=${HOA_NC_SIZE}"
+      o: "bind,size=${NEXTCLOUD_VOLUME_SIZE}"
       device: "/srv/volumes/${APP_NAME}"
 services:
   {{ item.name }}-db:
@@ -78,7 +78,7 @@ services:
     restart: always
     labels:
       - traefik.enable=true
-      - traefik.http.routers.${APP_NAME}.rule=Host(${APP_MAIN_DOMAIN})
+      - traefik.http.routers.${APP_NAME}.rule=Host(${APP_TRAEFIK_DOMAINS})
       - traefik.http.routers.${APP_NAME}.tls.certresolver=default    
     volumes:
       - vol-{{ item.name }}-app:/var/www/html:ro

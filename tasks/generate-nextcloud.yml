@@ -11,34 +11,27 @@
 - name: Debug 
   ansible.builtin.debug:
     msg:
-    - "DEBUG:: nextcloud_directory_stat: {{ nextcloud_directory_stat }}"
+    - "Deploying a nextcloud in {{ nextcloud_directory_stat.path }}"
 
-- name: Generate Nextcloud docker-compose
-  template:
-    src: docker-compose.yml.j2
-    dest: "{{ nextcloud_directory_stat.path }}/docker-compose.yml"
+- name: Copy Web Dockerfile
+  copy:
+    src: web
+    dest: "{{ nextcloud_directory_stat.path }}"
     owner: "{{ depl_user }}"
+    mode: 0644
 
-- name: Generate dotenv
+- name: Generate all files
   template:
-    src: dotenv.j2
-    dest: "{{ nextcloud_directory_stat.path }}/.env"
+    src: "{{ index_file.src }}"
+    dest: "{{ nextcloud_directory_stat.path }}/{{ index_file.dest }}"
     owner: "{{ depl_user }}"
     group: "{{ depl_group }}"
     mode: 0644
+  with_items:
+    - { src: 'dotenv.j2', dest: '.env' }
+    - { src: 'db.env.j2', dest: 'db.env' }
+    - { src: 'docker-compose.yml.j2', dest: 'docker-compose.yml' }
+    - { src: 'nginx.conf.j2', dest: 'web/nginx.conf' }
+  loop_control:
+    loop_var: index_file
 
-- name: Generate db.env
-  template:
-    src: db.env.j2
-    dest: "{{ nextcloud_directory_stat.path }}/db.env"
-    owner: "{{ depl_user }}"
-    group: "{{ depl_group }}"
-    mode: 0644
-
-- name: Generate nginx.conf
-  template:
-    src: nginx.conf.j2
-    dest: "{{ nextcloud_directory_stat.path }}/nginx.conf"
-    owner: "{{ depl_user }}"
-    group: "{{ depl_group }}"
-    mode: 0644
